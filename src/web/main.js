@@ -215,7 +215,6 @@ var phonenumber = form.phonenumber
 //onSubmit Function
 function onSubmit(event) {
     event.preventDefault();
-    console.log(form.name.value);
 
     swal({
         title: "이용약관(개인정보 처리방침)",
@@ -253,11 +252,6 @@ function onSubmit(event) {
                     title: title,
                     text: data.message,
                     icon: icon,
-                    buttons: {
-                        confirm: "OK"
-                    },
-                    dangerMode: false,
-
                 })
             })
 
@@ -266,7 +260,7 @@ function onSubmit(event) {
 }
 
 
-function unreg() {
+function Unregster() {
     swal({
         title: "등록해제",
         text: "등록을 해제하려면,\n 생년월일 6자를 입력해주세요.",
@@ -326,12 +320,26 @@ function unreg() {
                         closeOnClickOutside: false,
                         closeOnEsc: false,
                     }).then((password) => {
-                        $.post("UnregisterHcs", {
+                        $.post("UnregisterHCS", {
                             birthday,
                             name,
                             password
                         }, function (data) {
                             console.log(data)
+                            if (data.error){
+                                swal({
+                                    title: "등록해제 실패",
+                                    text: data.message,
+                                    icon: "error",
+                                })
+                            }else{
+                                swal({
+                                    title: "등록해제 성공!",
+                                    text: data.message,
+                                    icon: "success",
+                                })
+                            }
+                            
                         })
                     })
                 }
@@ -343,7 +351,7 @@ function unreg() {
 
 //Init
 function init() {
-    document.querySelector("#unreg_button").addEventListener("click", unreg)
+    document.querySelector("#unreg_button").addEventListener("click", Unregster)
     form.addEventListener("submit", onSubmit)
 }
 
