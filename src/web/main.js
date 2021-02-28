@@ -207,10 +207,10 @@ var phonenumber = form.phonenumber
 
 
 //로고 이미지 공유 기능 없는 기기에서만 표시
-document.getElementById("logoimage").style.display = "none";
-if (typeof navigator.share === "undefined") {
-    document.getElementById("logoimage").style.display = "block";
-}
+//document.getElementById("logoimage").style.display = "none";
+//if (typeof navigator.share === "undefined") {
+//    document.getElementById("logoimage").style.display = "block";
+//}
 
 //onSubmit Function
 function onSubmit(event) {
@@ -233,9 +233,32 @@ function onSubmit(event) {
                 "birthday": form.birthday.value,
                 "schoolname": form.schoolname.value
             }
-            $.post("test", postdata, function (data) {
-                console.log(postdata)
+            $.post("RegisterHCS", postdata, function (data) {
                 console.log(data)
+                var title = NaN;
+                var icon = NaN;
+                if (!data.error) {
+                    title = "등록 성공!";
+                    icon = "success";
+                    form.reset()
+                } else if (data.code == "ALREADY") {
+                    title = "이미 등록되었습니다!";
+                    icon = "warning";
+                    form.reset()
+                } else {
+                    title = "등록 실패";
+                    icon = "error"
+                }
+                swal({
+                    title: title,
+                    text: data.message,
+                    icon: icon,
+                    buttons: {
+                        confirm: "OK"
+                    },
+                    dangerMode: false,
+
+                })
             })
 
         }
@@ -255,34 +278,64 @@ function unreg() {
         content: {
             element: "input",
             attributes: {
-                placeholder: "040330",
+                placeholder: "xxxxxx",
                 type: "tel",
                 required: "required"
             },
         },
         closeOnClickOutside: false,
         closeOnEsc: false,
-    }).then((value) => {
-        if (value) {
+    }).then((birthday) => {
+        if (birthday) {
             swal({
                 title: "등록해제",
-                text: "등록을 해제를 계속하려면,\n 이름을 입력해주세요.",
+                text: "등록해제를 계속하려면,\n 이름을 입력해주세요.",
                 icon: "info",
                 buttons: {
                     cancel: "취소",
-                    confirm: "인증번호 전송",
+                    confirm: "다음",
                 },
                 content: {
                     element: "input",
                     attributes: {
-                        placeholder: "040330",
+                        placeholder: "홍길동",
                         type: "text",
                         required: "required"
                     },
                 },
                 closeOnClickOutside: false,
                 closeOnEsc: false,
-            }).then((value) => {})
+            }).then((name) => {
+                if (name) {
+                    swal({
+                        title: "등록해제",
+                        text: "등록해제를 계속하려면,\n 자가진단 비밀번호(4자, 숫자)를 입력해주세요.",
+                        icon: "info",
+                        buttons: {
+                            cancel: "취소",
+                            confirm: "등록해제",
+                        },
+                        content: {
+                            element: "input",
+                            attributes: {
+                                placeholder: "xxxx",
+                                type: "tel",
+                                required: "required"
+                            },
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                    }).then((password) => {
+                        $.post("UnregisterHcs", {
+                            birthday,
+                            name,
+                            password
+                        }, function (data) {
+                            console.log(data)
+                        })
+                    })
+                }
+            })
         }
     });
 }
