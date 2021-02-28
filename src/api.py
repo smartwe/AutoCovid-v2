@@ -11,7 +11,7 @@ import aiohttp
 import hcskr
 import json
 import pymongo.errors
-
+import datetime
 # Make custom Sanic Object
 class AutoCovid_v2(Sanic):
     def __init__(self):
@@ -80,7 +80,27 @@ async def route_RegisterHCS(request):
     del hcsdata['token']
     return response.json(hcsdata)
 
+@app.route("/UnregisterHCS", methods = ["POST"])
+async def route_UnregisterHCS(request):
+    responseTexts = {
+        "NOUSER": "유저정보를 찾을수 없습니다.\n 등록되지 않은 유저이거나,\n `생년월일, 이름, 비밀번호`를 잘못 입력하였습니다\n 다시 시도하십시오.",
+        "SUCCESS": "유저의 모든 정보를\nDB에서 삭제하였습니다.\n\n 앞으로는 7:30분에 \n자가진단이 수행되지 않습니다."
+    }
+    post_data = request.form
+    studentname = post_data.get("name")
+    birthday = post_data.get("birthday")
+    hcspassword = post_data.get("password")
+    
+    usermeta = {"name":studentname,"password":hcspassword,"birthday":birthday}
+    userid = md5hash(json.dumps(usermeta))
 
+    found_data = await app.db.hcsdata.find_one({"user":userid})
+    if not found_data:
+        return response.json({"error": True, "code": "NOUSER", "message": responseTexts.get("NOUSER")})
+    await app.db.hcsdata.find_one_and_delete({"user":userid})
+    del found_data['_id']
+    await app.db.archivedhcsdata.insert_one(found_data)
+    return response.json({"error": False, "code": "SUCCESS", "message": responseTexts.get("SUCCESS")})
 @app.route('/test', methods = ['POST',"GET"])
 async def testroute(request):
     request_headers = dict(request.headers)
