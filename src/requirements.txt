@@ -2,3 +2,5 @@ sanic
 motor
 aiohttp
 jinja2
+hcskr
+aiocron

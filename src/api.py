@@ -12,6 +12,7 @@ import hcskr
 import json
 import pymongo.errors
 import datetime
+import aiocron
 # Make custom Sanic Object
 class AutoCovid_v2(Sanic):
     def __init__(self):
@@ -31,11 +32,14 @@ def md5hash(string: str):
     enc.update(string.encode("utf8"))
     return enc.hexdigest()
 
-# Load Database Server
+# Init cron and Database
 @app.listener('before_server_start')
 async def notify_server_started(app, loop):
     app.dbclient = motor.motor_asyncio.AsyncIOMotorClient(f"mongodb://{config.mongo_host}:{config.mongo_port}",io_loop=loop)
     app.db = app.dbclient.AutoCovid_v2
+    #cron = aiocron.crontab("* * * * *",run_autohcs,loop=loop)
+    cron = aiocron.crontab("0 7 * * MON-FRI",run_autohcs,loop=loop)
+    print(datetime.datetime.now())
     await app.db.hcsdata.create_index("token",unique=True)
     print('Server Started!')
 
@@ -102,12 +106,35 @@ async def route_UnregisterHCS(request):
     found_data.update({"UnregisterTime": datetime.datetime.now()})
     await app.db.archivedhcsdata.insert_one(found_data)
     return response.json({"error": False, "code": "SUCCESS", "message": responseTexts.get("SUCCESS")})
-@app.route('/test', methods = ['POST',"GET"])
+
+@app.route('/headertest', methods = ['POST',"GET"])
 async def testroute(request):
     request_headers = dict(request.headers)
     return response.json(request_headers)
-@app.route('/ip', methods = ['POST',"GET"])
-async def iproute(request):
-    return response.text(request.ip)
+@app.route("/runnow")
+async def route_runnow(request):
+    try:
+        auth = request.args.get("auth")
+    except:
+        return response.json({"error":"Unauthorized"}, 401)
+    if auth == config.authcode:
+        data=await run_autohcs()
+        return response.json({"result":data})
+    else:
+        return response.json({"error":"Forbidden"}, 403)
 
+#@aiocron.crontab("0 0 7 ? * MON-FRI *")
+#@aiocron.crontab("0 41 21 1/1 * ? *")
+async def run_autohcs():
+    cursor = app.db.hcsdata.find({})
+    for document in await cursor.to_list(length=5000):
+        try:
+            hcsdata = await hcskr.asyncTokenSelfCheck(document.get("token"))
+            if hcsdata.get("error"):
+                print(f"ERROR!: {document.get('userid')}, {document.get('phonenumber')}, {hcsdata}")
+            print(hcsdata)
+        except:
+            print(document)
+            continue
+    return True
 app.run(host="0.0.0.0",port=12345, debug=True)
