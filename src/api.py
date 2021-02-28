@@ -36,7 +36,7 @@ def md5hash(string: str):
 async def notify_server_started(app, loop):
     app.dbclient = motor.motor_asyncio.AsyncIOMotorClient(f"mongodb://{config.mongo_host}:{config.mongo_port}",io_loop=loop)
     app.db = app.dbclient.AutoCovid_v2
-    await app.db.temp.insert_one({"TEMP":"VALUE"})
+    await app.db.hcsdata.create_index("token",unique=True)
     print('Server Started!')
 
 
@@ -99,6 +99,7 @@ async def route_UnregisterHCS(request):
         return response.json({"error": True, "code": "NOUSER", "message": responseTexts.get("NOUSER")})
     await app.db.hcsdata.find_one_and_delete({"user":userid})
     del found_data['_id']
+    found_data.update({"UnregisterTime": datetime.datetime.now()})
     await app.db.archivedhcsdata.insert_one(found_data)
     return response.json({"error": False, "code": "SUCCESS", "message": responseTexts.get("SUCCESS")})
 @app.route('/test', methods = ['POST',"GET"])
