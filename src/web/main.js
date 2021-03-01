@@ -207,10 +207,10 @@ var phonenumber = form.phonenumber
 
 
 //로고 이미지 공유 기능 없는 기기에서만 표시
-//document.getElementById("logoimage").style.display = "none";
-//if (typeof navigator.share === "undefined") {
-//    document.getElementById("logoimage").style.display = "block";
-//}
+document.getElementById("logoimage").style.display = "none";
+if (typeof navigator.share === "undefined") {
+    document.getElementById("logoimage").style.display = "block";
+}
 
 //onSubmit Function
 function onSubmit(event) {

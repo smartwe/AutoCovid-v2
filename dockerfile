@@ -1,10 +1,5 @@
 FROM ubuntu:20.04
 
-# /app 디렉토리 생성, 사용
-RUN mkdir -p /app
-WORKDIR /app
-ADD . /app
-
 # ENV 설정
 ENV DOCKER-MONGO-HOST=localhost
 ENV DOCKER-MONGO-PORT=27017
@@ -14,7 +9,12 @@ ENV TZ=Asia/Seoul
 
 # 파이썬 설치
 RUN apt-get -y update &&\
- apt-get install -y python3 python3-pip tzdata
+ apt-get install -y python3 python3-pip
+
+# /app 디렉토리 생성, 복사
+RUN mkdir -p /app
+WORKDIR /app
+ADD . /app
 
 # 필요 모듈 설치
 RUN pip3 install -r src/requirements.txt

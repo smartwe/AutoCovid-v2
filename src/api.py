@@ -14,8 +14,11 @@ import pymongo.errors
 import datetime
 import aiocron
 import os
+import logging
 
 _folderpath = os.path.join(os.path.dirname(__file__),"web/")
+def get_loggers():
+    pass
 # Make custom Sanic Object
 class AutoCovid_v2(Sanic):
     def __init__(self):
@@ -37,7 +40,7 @@ def md5hash(string: str):
 
 # Init cron and Database
 @app.listener('before_server_start')
-async def notify_server_started(app, loop):
+async def before_server_start(app, loop):
     app.dbclient = motor.motor_asyncio.AsyncIOMotorClient(f"mongodb://{config.mongo_host}:{config.mongo_port}",io_loop=loop)
     app.db = app.dbclient.AutoCovid_v2
     #cron = aiocron.crontab("* * * * *",run_autohcs,loop=loop)
@@ -50,7 +53,7 @@ async def notify_server_started(app, loop):
 # Render Homepage
 @app.route('/')
 async def route_root(request):
-    data={"mode":"normal"}
+    data={"count":await app.db.hcsdata.estimated_document_count(maxTimeMS=10000)}
     template = app.templateEnv.get_template('index.html')
     return response.html(template.render(data))
 
