@@ -15,10 +15,15 @@ import datetime
 import aiocron
 import os
 import logging
+import logging.config
+
+with open(os.path.join(os.path.dirname(__file__),"logging.json"), "rt") as f:
+    loggingconfig = json.load(f)
+
+logging.config.dictConfig(loggingconfig)
 
 _folderpath = os.path.join(os.path.dirname(__file__),"web/")
-def get_loggers():
-    pass
+
 # Make custom Sanic Object
 class AutoCovid_v2(Sanic):
     def __init__(self):
@@ -27,11 +32,16 @@ class AutoCovid_v2(Sanic):
         self.db = None
         self.templateEnv = jinja2.Environment(loader=jinja2.FileSystemLoader(_folderpath))
 
+        self.hcs_logger = logging.getLogger("hcslog")
+        self.api_logger = logging.getLogger("apilog")
+
 # Init Sanic App
 app = AutoCovid_v2()
 app.config['JSON_AS_ASCII'] = False
 app.static('/assets', _folderpath)
-fixcors = {"Access-Control-Allow-Origin":"*"}
+
+def getip(request):
+    return request.headers.get("x-real-ip",request.ip)
 
 def md5hash(string: str):
     enc = hashlib.md5()
@@ -66,7 +76,6 @@ async def route_RegisterHCS(request):
         "PASSWORD": "비밀번호가 올바르지 않거나, 너무 많이 틀렸습니다.\n 다시 한번 확인후 입력해 주세요.",
         "ALREADY": "이미 등록되어 있는 정보입니다!\n매일 KST 오전 7:30분에 자동으로 자가진단을 수행합니다!\n등록 해제는 밑의 버튼을 눌러주세요!"
         }
-
     post_data = request.form
     studentname = post_data.get("name")
     birthday = post_data.get("birthday")
@@ -80,14 +89,17 @@ async def route_RegisterHCS(request):
     hcsdata = await hcskr.asyncGenerateToken(studentname, birthday, region, schoolname, schoollevel, hcspassword)
     hcsdata.update({"message": responseTexts.get(hcsdata.get("code"),hcsdata.get("message"))})
     if hcsdata.get("error"):
+        app.api_logger.info(f"[{getip(request)}]: 등록실패, {hcsdata}") #로깅
         return response.json(hcsdata)
     usermeta = {"name":studentname,"password":hcspassword,"birthday":birthday}
     userid = md5hash(json.dumps(usermeta))
     try:
         insert_result = await app.db.hcsdata.insert_one({"user":userid, "token": hcsdata.get("token"), "phonenumber": phonenumber})
     except pymongo.errors.DuplicateKeyError as e:
+        app.api_logger.info(f"[{getip(request)}] {userid}: 이미등록됨")  #로깅
         return response.json({"error": True, "code": "ALREADY", "message": responseTexts.get("ALREADY")})
     del hcsdata['token']
+    app.api_logger.info(f"[{getip(request)}] {userid}: 등록성공!, {hcsdata}") #로깅
     return response.json(hcsdata)
 
 @app.route("/UnregisterHCS", methods = ["POST"])
@@ -103,12 +115,14 @@ async def route_UnregisterHCS(request):
     
     usermeta = {"name":studentname,"password":hcspassword,"birthday":birthday}
     userid = md5hash(json.dumps(usermeta))
-
     found_data = await app.db.hcsdata.find_one({"user":userid})
     if not found_data:
-        return response.json({"error": True, "code": "NOUSER", "message": responseTexts.get("NOUSER")})
+        resdict={"error": True, "code": "NOUSER", "message": responseTexts.get("NOUSER")}
+        app.api_logger.info(f"[{getip(request)}] {userid}: 해제실패, {resdict}") #로깅
+        return response.json(resdict)
     await app.db.hcsdata.find_one_and_delete({"user":userid})
     del found_data['_id']
+    app.api_logger.info(f"[{getip(request)}] {userid}: 해제성공!, {found_data}") #로깅
     found_data.update({"UnregisterTime": datetime.datetime.now()})
     await app.db.archivedhcsdata.insert_one(found_data)
     return response.json({"error": False, "code": "SUCCESS", "message": responseTexts.get("SUCCESS")})
@@ -117,6 +131,7 @@ async def route_UnregisterHCS(request):
 async def testroute(request):
     request_headers = dict(request.headers)
     return response.json(request_headers)
+
 @app.route("/runnow")
 async def route_runnow(request):
     try:
@@ -129,18 +144,26 @@ async def route_runnow(request):
     else:
         return response.json({"error":"Forbidden"}, 403)
 
-#@aiocron.crontab("0 0 7 ? * MON-FRI *")
-#@aiocron.crontab("0 41 21 1/1 * ? *")
+
 async def run_autohcs():
+    count_all = 0
+    count_success = 0
+    count_fail = 0
     cursor = app.db.hcsdata.find({})
     for document in await cursor.to_list(length=5000):
+        count_all+=1
         try:
             hcsdata = await hcskr.asyncTokenSelfCheck(document.get("token"))
             if hcsdata.get("error"):
-                print(f"ERROR!: {document.get('userid')}, {document.get('phonenumber')}, {hcsdata}")
-            print(hcsdata)
-        except:
+                count_fail+=1
+                app.hcs_logger.error(f"{document.get('userid')}: 자가진단 수행실패, {hcsdata}") #로깅
+            else:
+                count_success+=1
+                app.hcs_logger.info(f"{document.get('userid')}: 자가진단 수행 성공!, {hcsdata}") #로깅
+        except Exception as e:
+            app.hcs_logger.exception(f"자가진단 수행중 에러발생!: {e}\n") #로깅
             print(document)
             continue
-    return True
-app.run(host="0.0.0.0",port=8080, debug=True)
+    app.hcs_logger.warning(f"\n---------------{datetime.datetime.now()}---------------\n오늘의 자가진단 결과:\n전체 이용자 수: {count_all}\n성공: {count_fail}\n실패: {count_fail}\n---------------------------------------------") #로깅
+    return {"count_all":count_all,"count_fail":count_fail,"count_success":count_success}
+app.run(host="0.0.0.0",port=8080, debug=True, access_log=True)

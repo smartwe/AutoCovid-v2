@@ -1,0 +1,44 @@
+{
+    "version": 1,
+    "disable_existing_loggers": false,
+    "formatters": {
+        "simple": {
+            "format": "%(asctime)s [%(levelname)s] [%(funcName)s] - %(message)s"
+        }
+    },
+
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "level": "DEBUG",
+            "formatter": "simple",
+            "stream": "ext://sys.stdout"
+        },
+        "acv_file": {
+            "class": "logging.FileHandler",
+            "level": "INFO",
+            "formatter": "simple",
+            "filename": "./logs/api.log"
+        },
+        "hcs_file": {
+            "class": "logging.FileHandler",
+            "level": "INFO",
+            "formatter": "simple",
+            "filename": "./logs/hcs.log"
+        }
+    },
+
+    "root": {
+        "level": "DEBUG"
+    },
+    "loggers": {
+        "apilog": {
+            "level": "DEBUG",
+            "handlers": ["console", "acv_file"]
+        },
+        "hcslog": {
+            "level": "INFO",
+            "handlers": ["console", "hcs_file"]
+        }
+    }
+}
