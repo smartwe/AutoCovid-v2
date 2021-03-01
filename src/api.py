@@ -17,7 +17,7 @@ import os
 import logging
 import logging.config
 
-with open(os.path.join(os.path.dirname(__file__),"logging.json"), "rt") as f:
+with open(os.path.join(os.path.dirname(__file__),config.logconfig), "rt") as f:
     loggingconfig = json.load(f)
 
 logging.config.dictConfig(loggingconfig)
