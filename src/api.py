@@ -13,18 +13,21 @@ import json
 import pymongo.errors
 import datetime
 import aiocron
+import os
+
+_folderpath = os.path.join(os.path.dirname(__file__),"web/")
 # Make custom Sanic Object
 class AutoCovid_v2(Sanic):
     def __init__(self):
         super().__init__(__name__)
         self.dbclient=None
         self.db = None
-        self.templateEnv = jinja2.Environment(loader=jinja2.FileSystemLoader('./web/'))
+        self.templateEnv = jinja2.Environment(loader=jinja2.FileSystemLoader(_folderpath))
 
 # Init Sanic App
 app = AutoCovid_v2()
 app.config['JSON_AS_ASCII'] = False
-app.static('/assets', './web')
+app.static('/assets', _folderpath)
 fixcors = {"Access-Control-Allow-Origin":"*"}
 
 def md5hash(string: str):
