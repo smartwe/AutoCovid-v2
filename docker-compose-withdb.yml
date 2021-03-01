@@ -26,6 +26,8 @@ services:
     networks: 
       autocovid-v2:
         ipv4_address: 172.20.0.20
+    volumes:
+      - ./logs:/logs
     ports: 
-      - 32767:8080
+      - 32768:8080
 

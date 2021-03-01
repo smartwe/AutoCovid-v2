@@ -11,6 +11,9 @@ ENV TZ=Asia/Seoul
 RUN apt-get -y update &&\
  apt-get install -y python3 python3-pip
 
+# TZDATA 설치
+RUN DEBIAN_FRONTEND="noninteractive" apt-get -y install tzdata
+
 # /app 디렉토리 생성, 복사
 RUN mkdir -p /app
 WORKDIR /app

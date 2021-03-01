@@ -18,13 +18,13 @@
             "class": "logging.FileHandler",
             "level": "INFO",
             "formatter": "simple",
-            "filename": "/app/src/logs/api.log"
+            "filename": "/logs/api.log"
         },
         "hcs_file": {
             "class": "logging.FileHandler",
             "level": "INFO",
             "formatter": "simple",
-            "filename": "/app/src/logs/hcs.log"
+            "filename": "/logs/hcs.log"
         }
     },
 
