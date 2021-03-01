@@ -1,11 +1,17 @@
 version: "3"
 
+networks:
+  autocovid-v2:
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
+
 services: 
   mongo:
     image: mongo:bionic
     networks: 
       autocovid-v2:
-        ipv4_address: 172.16.238.1
+        ipv4_address: 172.20.0.10
     ports: 
       - 37017:27017
   
@@ -14,18 +20,12 @@ services:
       context: .
       dockerfile: ./dockerfile
     environment: 
-      DOCKER-MONGO-HOST: 172.16.238.1
+      DOCKER-MONGO-HOST: 172.20.0.10
       DOCKER-MONGO-PORT: 27017
       DOCKER-AUTHCODE: authcode
     networks: 
       autocovid-v2:
-        ipv4_address: 172.16.238.2
+        ipv4_address: 172.20.0.20
     ports: 
-      - 32768:8080
+      - 32767:8080
 
-networks:
-  autocovid-v2:
-    ipam:
-      driver: default
-      config:
-        - subnet: "172.16.238.0/24"
