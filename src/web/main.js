@@ -205,12 +205,13 @@ var password = form.password
 var phonenumber = form.phonenumber
 
 
-
-//로고 이미지 공유 기능 없는 기기에서만 표시
-document.getElementById("logoimage").style.display = "none";
-if (typeof navigator.share === "undefined") {
-    document.getElementById("logoimage").style.display = "block";
+var isTouchDevice = (navigator.maxTouchPoints || 'ontouchstart' in document.documentElement);
+console.log(isTouchDevice)
+// 모바일에서 로고 숨기기
+if (isTouchDevice){
+    document.getElementById("logoimage").style.display = "none";
 }
+
 
 //onSubmit Function
 function onSubmit(event) {
