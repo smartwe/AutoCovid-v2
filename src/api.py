@@ -127,6 +127,11 @@ async def route_UnregisterHCS(request):
     await app.db.archivedhcsdata.insert_one(found_data)
     return response.json({"error": False, "code": "SUCCESS", "message": responseTexts.get("SUCCESS")})
 
+@app.route('/github', methods = ["GET"])
+async def route_github(request):
+    app.api_logger.debug(f"[{getip(request)}] 깃허브 조회 발생") #로깅
+    return response.redirect("https://github.com/331leo/AutoCovid-v2")
+
 @app.route('/headertest', methods = ['POST',"GET"])
 async def testroute(request):
     request_headers = dict(request.headers)
