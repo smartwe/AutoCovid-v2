@@ -63,7 +63,7 @@ async def before_server_start(app, loop):
 # Render Homepage
 @app.route('/')
 async def route_root(request):
-    data={"count":await app.db.hcsdata.estimated_document_count(maxTimeMS=10000)}
+    data={"count":await app.db.hcsdata.estimated_document_count(maxTimeMS=10000), "adsense_client":config.adsense_client}
     template = app.templateEnv.get_template('index.html')
     return response.html(template.render(data))
 
