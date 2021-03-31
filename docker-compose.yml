@@ -1,17 +1,18 @@
 version: "3"
 
-services: 
+services:
   webapi:
     build:
       context: .
       dockerfile: ./dockerfile
-    environment: 
-      DOCKER-MONGO-HOST: 172.17.0.3
+    environment:
+      DOCKER-MONGO-HOST: mongo
       DOCKER-MONGO-PORT: 27017
       DOCKER-AUTHCODE: authcode
     network_mode: bridge
+    external_links:
+      - mongo:mongo
     volumes:
       - ./logs:/logs
-    ports: 
+    ports:
       - 32768:8080
-
