@@ -3,7 +3,7 @@
 
 <head>
   <!-- Global site tag (gtag.js) - Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-6YY166V931"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id={{google_gtag}}"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
 
@@ -12,7 +12,7 @@
     }
     gtag('js', new Date());
 
-    gtag('config', 'G-6YY166V931');
+    gtag('config', '{{google_gtag}}');
   </script>
   <link rel="shortcut icon" href="/assets/favicon.ico">
   <meta charset="UTF-8">
@@ -26,14 +26,10 @@
   <meta property="og:url" content="https://autocovid.tech">
   <meta name="viewport"
     content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
-  <!--Naver search Advisor-->
-  <meta name="naver-site-verification" content="690cce5559bb1ea77b7d3d1c0a4ae57ba369e44c" />
 
   <script src="https://www.google.com/recaptcha/api.js?render=6LchV84ZAAAAAMVYszd97bz_vZWW7JYK_5eUoF_8"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-  <!--Google Adsense Auth-->
-  <script data-ad-client="{{adsense_client}}" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
   <link rel="stylesheet" href="/assets/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"
     integrity="sha512-NhSC1YmyruXifcj/KFRWoC561YpHpc5Jtzgvbuzx5VozKpWvQ+4nXhPdFgmx8xqexRcpAglTj9sIBWINXa8x5w=="
@@ -73,7 +69,7 @@
 
               <div class="logoimage" id="logoimage">
                 <p></p>
-                <img src="/assets/leokautocov.png" width="120" height="50" alt="">
+                <img src="/assets/leokautocov.png" style="margin-top: 1rem;"; width="120" height="50" alt="">
               </div>
               <div class="app-contact">이용자 수:{{count}}명<br>문의 support@leok.kr</br>&copy; Leok.kr</div>
             </div>
@@ -87,6 +83,7 @@
 
                   <div class="app-form-group">
                     <select name="region" class="app-form-control" style="color:#ffffff;">
+                      <option style="color:#778899;" selected disabled hidden>지역을 선택하세요</option>
                       <option style="color:#778899;" value="서울">서울</option>
                       <option style="color:#778899;" value="부산">부산</option>
                       <option style="color:#778899;" value="대구">대구</option>
@@ -114,6 +111,8 @@
 
                   <div class="app-form-group">
                     <select name="level" class="app-form-control" style="color:#ffffff;">
+                      <option style="color:#778899;" selected disabled hidden>학교급을 선택하세요</option>
+                      <option style="color:#778899;" value="유치원">유치원</option>
                       <option style="color:#778899;" value="초등학교">초등학교</option>
                       <option style="color:#778899;" value="중학교">중학교</option>
                       <option style="color:#778899;" value="고등학교">고등학교</option>

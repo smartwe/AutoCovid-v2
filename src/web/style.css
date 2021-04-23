@@ -16,8 +16,8 @@
 }
 
 body {
-    background: -webkit-gradient(linear, left top, right top, from(#ea1d6f), to(#eb466b));
-    background: linear-gradient(to right, #ea1d6f 0, #eb466b 100%);
+    background: -webkit-gradient(235deg, #2dc8ab, rgb(75, 208, 204) 47.48%, #6dc8fa);
+    background: linear-gradient(235deg, #2dc8ab, rgb(75, 208, 204) 47.48%, #6dc8fa);
     font-size: 12px
 }
 
@@ -137,7 +137,7 @@ select {
     -webkit-box-direction: normal;
     flex-direction: column;
     position: relative;
-    color: #ea1d6f;
+    color: #f9ca24;
     font-size: 26px
 }
 
@@ -149,7 +149,7 @@ select {
     bottom: -10px;
     width: 25px;
     height: 4px;
-    background: #ea1d6f
+    background: #f9ca24
 }
 
 .app-contact {
@@ -208,14 +208,14 @@ select {
 .app-form-button {
     background: 0 0;
     border: none;
-    color: #ea1d6f;
+    color: #f9ca24;
     font-size: 14px;
     cursor: pointer;
     outline: 0
 }
 
 .app-form-button:hover {
-    color: #b9134f
+    color: #ffdd61
 }
 
 .credits {
