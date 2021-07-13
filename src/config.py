@@ -2,7 +2,7 @@ import os
 
 #로컬환경
 mongo_host = "localhost"
-mongo_port = 27017
+mongo_port = 80
 authcode = "authcode"
 logconfig = "logging_local.json"
 google_gtag = "G-GOOGLE_GTAG"
